@@ -1,5 +1,15 @@
 # virtual environment folder
 .venv/
 
+# compiled python files
+__pycache__/
+*.pyc
+
+# VS Code settings
+.vscode/
+
+# system files
+.DS_Store
+
 # env file
 .env
