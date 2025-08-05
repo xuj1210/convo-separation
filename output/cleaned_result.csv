@@ -1,0 +1,38 @@
+,Unnamed: 0,speaker,text,start,end
+0,0,SPEAKER_01,This is our self introduction.,0.723,2.225
+1,1,SPEAKER_01,"Hey, how are you today?",3.035,3.98
+2,2,SPEAKER_00,I'm not finding you.,4.3,5.262
+3,3,SPEAKER_01,"Oh, I'm good. Just chilling.",5.735,7.304
+4,4,SPEAKER_01,So what do you do?,7.76,8.806
+5,5,SPEAKER_00,Like for a living.,9.363,10.24
+6,6,SPEAKER_01,"Yeah, like, are you in school? Do you work?",10.493,13.008
+7,7,SPEAKER_00,"Well, no, I don't want to get a job yet because I'm still in high school because I want to focus on my studies.",13.919,18.408
+8,8,SPEAKER_01,"Okay, are you doing good in school?",18.83,20.534
+9,9,SPEAKER_00,"Yes, I'm a junior, so I'm almost finished.",21.293,23.842
+10,10,SPEAKER_01,"Okay, that's cool. I'm a junior too, but I'm in college, so it's a little different.",24.348,28.921
+11,11,SPEAKER_00,"Oh, what do you study?",29.225,30.203
+12,12,SPEAKER_01,I study management information systems.,30.895,33.882
+13,13,SPEAKER_00,Is that like business?,35.114,36.413
+14,14,SPEAKER_01,"Yeah, it's a business major. Why are you interested?",36.667,39.046
+15,15,SPEAKER_00,"Yes, Lamar is a business school, so I'm thinking about starting my own business in the future.",39.822,43.889
+16,16,SPEAKER_01,"Okay, what do you want to do?",44.21,45.593
+17,17,SPEAKER_00,I want to open a nail salon.,45.982,47.416
+18,18,SPEAKER_01,A nail salon? You like doing nails?,47.753,49.88
+19,19,SPEAKER_00,"Yes, it's very fun for me.",50.082,52.563
+20,20,SPEAKER_01,Hmm.,53.153,53.862
+21,21,SPEAKER_00,It's like one of my hobbies.,53.457,54.925
+22,22,SPEAKER_01,"Okay, what other hobbies do you have?",55.718,57.389
+23,23,SPEAKER_00,"Well, I like doing makeup as well.",58.435,61.135
+24,24,SPEAKER_01,"Makeup, so you wanna be a makeup artist?",61.608,63.464
+25,25,SPEAKER_00,"No, not really. I can only do my own face.",63.802,66.13
+26,26,SPEAKER_01,"Oh, you don't want to do any one-nosis? I understand. I don't wear makeup. I don't have the patience to do that.",66.383,71.615
+27,27,SPEAKER_00,"Oh, you should try it. It's really fun.",72.239,73.927
+28,28,SPEAKER_01,"Yeah, it looks fun, but I don't think it's for me, no.",74.467,78.382
+29,29,SPEAKER_00,"Okay, well what about nails? Will you get your nails done?",78.584,80.947
+30,30,SPEAKER_01,"No, I don't get my nails, and I used to, but I stopped after, you know, I had my son. It's just not something that I spend, I prefer to spend my money on.",81.233,89.266
+31,31,SPEAKER_00,"Oh, really? You have a son? How old is he?",89.57,91.527
+32,32,SPEAKER_01,"Uh, he's, what, five months now?",92.067,94.227
+33,33,SPEAKER_00,"Oh, so he's just, he's like fresh. He's a newborn.",95.138,98.345
+34,34,SPEAKER_01,"He's a newborn, yeah.",98.682,100.049
+35,35,SPEAKER_00,"Oh, I would love to see him one day.",101.264,103.188
+36,36,SPEAKER_01,"Oh, Lord.",104.588,105.263

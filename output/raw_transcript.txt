@@ -1,0 +1,35 @@
+SPEAKER_01: This is our self introduction. Hey, how are you today?
+SPEAKER_00: I'm not finding you.
+SPEAKER_01: Oh, I'm good. Just chilling. So what do you do?
+SPEAKER_00: Like for a living.
+SPEAKER_01: Yeah, like, are you in school? Do you work?
+SPEAKER_00: Well, no, I don't want to get a job yet because I'm still in high school because I want to focus on my studies.
+SPEAKER_01: Okay, are you doing good in school?
+SPEAKER_00: Yes, I'm a junior, so I'm almost finished.
+SPEAKER_01: Okay, that's cool. I'm a junior too, but I'm in college, so it's a little different.
+SPEAKER_00: Oh, what do you study?
+SPEAKER_01: I study management information systems.
+SPEAKER_00: Is that like business?
+SPEAKER_01: Yeah, it's a business major. Why are you interested?
+SPEAKER_00: Yes, Lamar is a business school, so I'm thinking about starting my own business in the future.
+SPEAKER_01: Okay, what do you want to do?
+SPEAKER_00: I want to open a nail salon.
+SPEAKER_01: A nail salon? You like doing nails?
+SPEAKER_00: Yes, it's very fun for me.
+SPEAKER_01: Hmm.
+SPEAKER_00: It's like one of my hobbies.
+SPEAKER_01: Okay, what other hobbies do you have?
+SPEAKER_00: Well, I like doing makeup as well.
+SPEAKER_01: Makeup, so you wanna be a makeup artist?
+SPEAKER_00: No, not really. I can only do my own face.
+SPEAKER_01: Oh, you don't want to do any one-nosis? I understand. I don't wear makeup. I don't have the patience to do that.
+SPEAKER_00: Oh, you should try it. It's really fun.
+SPEAKER_01: Yeah, it looks fun, but I don't think it's for me, no.
+SPEAKER_00: Okay, well what about nails? Will you get your nails done?
+SPEAKER_01: No, I don't get my nails, and I used to, but I stopped after, you know, I had my son. It's just not something that I spend, I prefer to spend my money on.
+SPEAKER_00: Oh, really? You have a son? How old is he?
+SPEAKER_01: Uh, he's, what, five months now?
+SPEAKER_00: Oh, so he's just, he's like fresh. He's a newborn.
+SPEAKER_01: He's a newborn, yeah.
+SPEAKER_00: Oh, I would love to see him one day.
+SPEAKER_01: Oh, Lord.
