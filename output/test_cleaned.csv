@@ -1,7 +1,7 @@
 ,speaker,text,start,end
 0,SPEAKER_01,"This is our self introduction. Hey, how are you today?",0.723,3.98
 1,SPEAKER_00,I'm not finding you.,0.723,5.262
-2,SPEAKER_01,"Oh, I'm good. Just chilling. So what do you do?",0.723,8.806
+2,SPEAKER_01,"Oh, I'm good. Just chilling. So what do you do for a living?",0.723,8.806
 3,SPEAKER_00,Like for a living.,0.723,10.24
 4,SPEAKER_01,"Yeah, like, are you in school? Do you work?",0.723,13.008
 5,SPEAKER_00,"Well, no, I don't want to get a job yet because I'm still in high school because I want to focus on my studies.",0.723,18.408
@@ -23,7 +23,7 @@
 21,SPEAKER_00,"Well, I like doing makeup as well.",0.723,61.135
 22,SPEAKER_01,"Makeup, so you wanna be a makeup artist?",0.723,63.464
 23,SPEAKER_00,"No, not really. I can only do my own face.",0.723,66.13
-24,SPEAKER_01,"Oh, you don't want to do any one-on-ones? I understand. I don't wear makeup. I don't have the patience to do that.",0.723,71.615
+24,SPEAKER_01,"Oh, you don't want to do any one-nosis? I understand. I don't wear makeup. I don't have the patience to do that.",0.723,71.615
 25,SPEAKER_00,"Oh, you should try it. It's really fun.",0.723,73.927
 26,SPEAKER_01,"Yeah, it looks fun, but I don't think it's for me, no.",0.723,78.382
 27,SPEAKER_00,"Okay, well what about nails? Will you get your nails done?",0.723,80.947

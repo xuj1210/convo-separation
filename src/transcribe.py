@@ -6,6 +6,7 @@ from torch.nn.attention import SDPBackend, sdpa_kernel
 from tqdm import tqdm
 from pydub import AudioSegment
 from contextlib import nullcontext
+from audio_preprocess import preprocess_audio
 
 class WhisperTranscriber:
     """
@@ -74,28 +75,20 @@ class WhisperTranscriber:
             dict: The transcription result with timestamps.
         """
 
-        
-        
-
         if isinstance(audio_input, str):
             if not os.path.exists(audio_input):
                 print(f"Error: Audio file not found at {audio_input}")
                 return None
             
-            prepped_input = audio_input
-        elif isinstance(audio_input, AudioSegment):
-            samples = np.array(audio_input.normalize().set_frame_rate(self.sampling_rate).get_array_of_samples())
-            scaled_samples = samples.astype(np.float32) / audio_input.max_possible_amplitude
+            waveform, _ = preprocess_audio(audio_input, target_sample_rate=self.sampling_rate)
 
-            prepped_input = {'sampling_rate': self.sampling_rate, 'array': scaled_samples}
             
-        # Case 2: Input is a pre-scaled numpy array
-        elif isinstance(audio_input, np.ndarray):
-            # trust that sampling rate given is correct 16k
-            prepped_input = {'sampling_rate': self.sampling_rate, 'array': audio_input}
+        elif isinstance(audio_input, torch.Tensor):
+            # assumes audio is already preprocessed
+            waveform = audio_input
         
         else:
-            print(f"Error: Unsupported audio input type: {type(audio_input)}")
+            print(f"Error: Unsupported audio input type: {type(audio_input)}. Must receive audio file name or Tensor of waveform")
             return None
 
         try:
@@ -109,7 +102,7 @@ class WhisperTranscriber:
 
             with kernel_context:
                 result = self.pipe(
-                    prepped_input, 
+                    waveform, 
                     generate_kwargs={
                         "language": "english",
                         "temperature": (0.0, 0.2, 0.4, 0.6, 0.8, 1.0),
