@@ -1,0 +1,32 @@
+error_type,ref_word,hyp_word,start_time,end_time,speaker,full_ref_text,full_hyp_text
+substitute,doing fine,not finding,4.3,5.752,Speaker_2,"I'm doing fine , and you ?",I'm not finding you.
+delete,and,,4.3,5.752,Speaker_2,"I'm doing fine , and you ?",I'm not finding you.
+substitute,coz,because,13.947,18.631,Speaker_2,"well no , I don't wanna get a job yet coz I'm still in high school coz I wanna focus on my studies .","Well, no, I don't want to get a job yet because I'm still in high school because I want to focus on my studies."
+substitute,coz,because,13.947,18.631,Speaker_2,"well no , I don't wanna get a job yet coz I'm still in high school coz I wanna focus on my studies .","Well, no, I don't want to get a job yet because I'm still in high school because I want to focus on my studies."
+delete,oh,,44.253,46.031,Speaker_1,"oh , okay . what do you wanna do ?","Okay, what do you want to do?"
+delete,do,,47.804,50.104,Speaker_1,"a nail salon , do you like doing nails ?",A nail salon? You like doing nails?
+delete,oh,,55.709,58.429,Speaker_1,"oh , okay . what other hobbies do you have ?","Okay, what other hobbies do you have?"
+substitute,make,makeup,58.429,61.681,Speaker_2,"well , I like doing make up , as well .","Well, I like doing makeup as well."
+delete,up,,58.429,61.681,Speaker_2,"well , I like doing make up , as well .","Well, I like doing makeup as well."
+substitute,make,makeup,61.681,63.836,Speaker_1,make up . so you wanna be a make up artist ?,"Makeup, so you wanna be a makeup artist?"
+delete,up,,61.681,63.836,Speaker_1,make up . so you wanna be a make up artist ?,"Makeup, so you wanna be a makeup artist?"
+substitute,make,makeup,61.681,63.836,Speaker_1,make up . so you wanna be a make up artist ?,"Makeup, so you wanna be a makeup artist?"
+delete,up,,61.681,63.836,Speaker_1,make up . so you wanna be a make up artist ?,"Makeup, so you wanna be a makeup artist?"
+delete,do i do not,,66.463,72.297,Speaker_1,"oh , you don't wanna do anyone else's . I understand . I don't do -- I don't wear make up . I don't have the patience to do that .","Oh, you don't want to do anyone else's. I understand. I don't wear makeup. I don't have the patience to do that."
+substitute,make,makeup,66.463,72.297,Speaker_1,"oh , you don't wanna do anyone else's . I understand . I don't do -- I don't wear make up . I don't have the patience to do that .","Oh, you don't want to do anyone else's. I understand. I don't wear makeup. I don't have the patience to do that."
+delete,up,,66.463,72.297,Speaker_1,"oh , you don't wanna do anyone else's . I understand . I don't do -- I don't wear make up . I don't have the patience to do that .","Oh, you don't want to do anyone else's. I understand. I don't wear makeup. I don't have the patience to do that."
+delete,i do not i do not,,74.449,78.63,Speaker_1,"yeah , it looks fun but I don't I don't I don't think it's for me , no .","Yeah, it looks fun, but I don't think it's for me right now."
+insert,,right,74.449,78.63,Speaker_1,"yeah , it looks fun but I don't I don't I don't think it's for me , no .","Yeah, it looks fun, but I don't think it's for me right now."
+substitute,no,now,74.449,78.63,Speaker_1,"yeah , it looks fun but I don't I don't I don't think it's for me , no .","Yeah, it looks fun, but I don't think it's for me right now."
+substitute,do,will,78.63,81.279,Speaker_2,"okay well , what about nails , do you get your nails done ?","Okay, well what about nails? Will you get your nails done?"
+substitute,and,done,81.279,89.59,Speaker_1,"no , I don't get my nails and I used to but I stopped after you know , I had my son . it's just not something that I spend I prefer to spend my money on .","No, I don't get my nails done. I used to, but I stopped after I had my son. It's just not something that I prefer to spend my money on."
+delete,you know,,81.279,89.59,Speaker_1,"no , I don't get my nails and I used to but I stopped after you know , I had my son . it's just not something that I spend I prefer to spend my money on .","No, I don't get my nails done. I used to, but I stopped after I had my son. It's just not something that I prefer to spend my money on."
+delete,i spend,,81.279,89.59,Speaker_1,"no , I don't get my nails and I used to but I stopped after you know , I had my son . it's just not something that I spend I prefer to spend my money on .","No, I don't get my nails done. I used to, but I stopped after I had my son. It's just not something that I prefer to spend my money on."
+insert,,uh,92.079,95.172,Speaker_1,"he's what , five months now .","Uh, he's, what, five months now?"
+insert,,is,95.172,98.742,Speaker_2,oh so he just -- he's like fresh . he's a new born .,"Oh, so he's just, he's like fresh. He's a newborn."
+substitute,new,newborn,95.172,98.742,Speaker_2,oh so he just -- he's like fresh . he's a new born .,"Oh, so he's just, he's like fresh. He's a newborn."
+delete,born,,95.172,98.742,Speaker_2,oh so he just -- he's like fresh . he's a new born .,"Oh, so he's just, he's like fresh. He's a newborn."
+substitute,new,newborn,98.742,101.308,Speaker_1,"he's a new born , yeah .",He's a newborn. Yeah.
+delete,born,,98.742,101.308,Speaker_1,"he's a new born , yeah .",He's a newborn. Yeah.
+delete,wow,,101.308,104.655,Speaker_2,"oh , wow ! I'd love to see him one day .","Oh, I would love to see him one day."
+insert,,lord,104.655,105.216,Speaker_1,"oh ,","Oh, Lord."

@@ -25,26 +25,25 @@ class Diarizer:
     Speech diarization using pyannote.audio and transcription using Whisper
     """
 
-    def __init__(self, model_id="pyannote/speaker-diarization-3.1", 
-                 use_compile=False):
+    def __init__(self, model_id="pyannote/speaker-diarization-3.1"):
         """
         Args:
             model_id (str): model ID
         """
 
-        if torch.backends.mps.is_available():
-            self.device = "mps"
-        elif torch.cuda.is_available():
-            self.device = "cuda"
+        if torch.cuda.is_available():
+            self.device = torch.device("cuda")
+        elif torch.backends.mps.is_available():
+            self.device = torch.device("mps")
         else:
-            self.device = "cpu"
+            self.device = torch.device("cpu")
         
         self.pipe = Pipeline.from_pretrained(
             model_id,
             use_auth_token=HUGGING_FACE_ACCESS_TOKEN
         ).to(torch.device(self.device))
 
-        self.transcriber = WhisperTranscriber(use_compile=use_compile)
+        self.transcriber = WhisperTranscriber()
         
         self.ollama_api_url = "http://localhost:11434/api/chat"
 
@@ -56,7 +55,10 @@ class Diarizer:
             "or sentences that makes no sense in the context of the overall dialogue.\n"
             "2. **Correct Errors:** The transcript was automatically generated from audio. Correct grammar, spelling, and punctuation errors. Also fix words or phrases that are likely incorrect because they sound similar to the correct word when spoken (e.g., 'know' instead of 'no').\n"            
             # "3. **Maintain Originality:** Do not add or remove any information. Preserve the original meaning and intent of the speakers exactly as it was. Do not combine or split sentences.\n"
-            "3. **Preserve Structure:** The number of lines in your output must be identical to the number of lines in the input. Each line should begin with the speaker label, followed by the corrected dialogue.\n\n"
+            "3. **Preserve Structure:** The number of lines in your output must be identical to the number of lines in the input. Each line should begin with the speaker label, followed by the corrected dialogue.\n"
+            # "4. Do not replace existing ' characters for alternatives.\n"
+            # "4. **Preserve Slang***: Do not convert slang into their formal forms (e.g. preserve 'wanna' rather than changing it to 'want to').\n"
+            "4. **Preserve Hyphenated Word Separations***: Do not add hyphenation between words that might normally be joined with one (e.g. self introduction vs. self-introduction).\n\n"
             "Your final output MUST be in this exact format, do not include any additional text besides the conversation:\n"
             "SPEAKER_[number]: [Corrected text]\n"
             "SPEAKER_[number]: [Corrected text]\n"
@@ -94,20 +96,8 @@ class Diarizer:
             "sample_rate": target_sample_rate
         })
 
-        results = []
-
-        for turn, _, speaker in tqdm(diarization.itertracks(yield_label=True)):
-            start_index = int((turn.start) * target_sample_rate)
-            end_index = int((turn.end) * target_sample_rate)
-            segment = waveform.squeeze()[start_index:end_index]
-            transcription = self.transcriber.transcribe_audio(segment)
-            if transcription:
-                results.append({
-                    'speaker': speaker,
-                    'text': transcription['text'].strip(),
-                    'start': round(turn.start, 3),
-                    'end': round(turn.end, 3)
-                })
+        waveform = waveform.squeeze()
+        results = self.transcriber.transcribe_diarized_audio(waveform, diarization)
         
         return self._clean_transcript(pd.DataFrame(results), method=self.clean_method)
 
@@ -119,17 +109,19 @@ class Diarizer:
             return conversation_df, None
 
         grouped_turns = []
-        current_speaker = None
-        current_text = ""
-        current_start = None
-        current_end = None
 
-        for _, row in conversation_df.iterrows():
+        first = conversation_df.iloc[0]
+        current_speaker = first['speaker']
+        current_text = first['text']
+        current_start = first['start']
+        current_end = first['end']
+
+        for _, row in conversation_df.iloc[1:].iterrows():
             end_time = row['end']
             speaker = row['speaker']
             text = row['text']
 
-            if speaker != current_speaker and current_speaker is not None:
+            if speaker != current_speaker:
                 grouped_turns.append({
                     'speaker': current_speaker,
                     'text': current_text.strip(),
@@ -137,22 +129,23 @@ class Diarizer:
                     'end': current_end,
                 })
                 current_text = ''
+                current_start = row['start']
             
             current_speaker = speaker
             current_text += f' {text}'
-            if current_start is None:
-                current_start = row['start']
             current_end = end_time
 
-        if current_speaker is not None:
-            grouped_turns.append({
-                'speaker': current_speaker,
-                'text': current_text.strip(),
-                'start': current_start,
-                'end': current_end,
-            })
+        # append final group
+        grouped_turns.append({
+            'speaker': current_speaker,
+            'text': current_text.strip(),
+            'start': current_start,
+            'end': current_end,
+        })
+        
         
         raw_transcript = '\n'.join([f"{turn['speaker']}: {turn['text']}" for turn in grouped_turns])
+        # pd.DataFrame(grouped_turns).to_csv('output/test_pre_llm.csv')
         return grouped_turns, raw_transcript
 
     def _apply_llm_response(self, grouped_turns, cleaned_text):
@@ -175,13 +168,14 @@ class Diarizer:
                 print(f"Warning: LLM response format mismatch. Skipping line: {line}")
                 continue
 
-            cleaned_text = line.split(':', 1)[1].strip()
+            cleaned_text = line.split(':', 1)[1].strip().replace('’', "'")
             cleaned.append({
                 'speaker': speaker,
                 'text': cleaned_text,
                 'start': turn_data['start'],
                 'end': turn_data['end']
             })
+        
         return pd.DataFrame(cleaned)
 
     def _clean_with_ollama(self, conversation_df: pd.DataFrame, ollama_model='gemma3n:e4b') -> pd.DataFrame:
@@ -222,6 +216,8 @@ class Diarizer:
         Cleans grammar and transcription errors using a Gemini LLM
         """
         grouped_turns, raw_transcript = self._get_cleaned_text(conversation_df)
+        with open('output/sample_raw_transcript.txt', 'w') as f:
+            f.write(raw_transcript)
         if raw_transcript is None:
             return conversation_df
 
@@ -229,9 +225,11 @@ class Diarizer:
 
         full_prompt = (
             f"{self.core_system_prompt}\n"
-            "Additionally, please refrain from switching existing ’ and ' characters.\n\n"
-            f"Edit the following conversation:\n\n{raw_transcript}"
+            f"Here is the conversation you must edit:\n\n{raw_transcript}"
         )
+
+        with open('gemini_prompt.txt', 'w') as f:
+            f.write(full_prompt)
 
         try:
             print(f'Sending prompt to Gemini model: {model}')
@@ -268,15 +266,18 @@ class Diarizer:
     
 
 if __name__ == "__main__":
-    sample_file = "data/sample.wav"
+    # directory = 'data/audio_recordings/Audio_Recordings/'
+    directory = 'data/'
+    # file = 'CAR0001.mp3'
+    file = 'sample.wav'
     d = Diarizer()
-    diarization_result = d.diarize_audio(sample_file)
+    diarization_result = d.diarize_audio(directory + file)
 
     # test = pd.read_csv('output/grouped_result.csv')
     # d._clean_transcript(test, method='ollama', ollama_model='cogito:8b').to_csv('test_cleaned.csv')
 
     if diarization_result is not None and not diarization_result.empty:
         os.makedirs("output", exist_ok=True)
-        output_file_path = "output/diarization_result.csv"
+        output_file_path = f"output/{file.split('.', 1)[0]}.csv"
         print(f"Writing diarization result to {output_file_path}")
         diarization_result.to_csv(output_file_path)

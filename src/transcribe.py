@@ -1,7 +1,7 @@
 import os
 import torch
 import numpy as np
-from transformers import AutoModelForSpeechSeq2Seq, AutoProcessor, pipeline
+from transformers import WhisperForConditionalGeneration, WhisperProcessor
 from torch.nn.attention import SDPBackend, sdpa_kernel
 from tqdm import tqdm
 from pydub import AudioSegment
@@ -13,7 +13,7 @@ class WhisperTranscriber:
     Audio transcription using the Whisper model pipeline
     """
 
-    def __init__(self, model_id="openai/whisper-large-v3-turbo", use_compile=False):
+    def __init__(self, model_id="openai/whisper-large-v3-turbo"):
         """
         Args:
             model_id (str): model ID from Hugging Face Hub
@@ -21,119 +21,121 @@ class WhisperTranscriber:
         """
 
         self.model_id = model_id
-        self.is_compiled = use_compile
 
-        if torch.backends.mps.is_available():
-            self.device = "mps"
-        elif torch.cuda.is_available():
-            self.device = "cuda"
+        if torch.cuda.is_available():
+            self.device = torch.device("cuda")
+        elif torch.backends.mps.is_available():
+            self.device = torch.device("mps")
         else:
-            self.device = "cpu"
+            self.device = torch.device("cpu")
         
         self.torch_dtype = torch.float16 if torch.cuda.is_available() else torch.float32
 
-        self.model = AutoModelForSpeechSeq2Seq.from_pretrained(
+        self.model = WhisperForConditionalGeneration.from_pretrained(
             self.model_id,
             torch_dtype=self.torch_dtype,
             low_cpu_mem_usage=True
-        ).to(torch.device(self.device))
-
-        if use_compile and self.device == 'cuda':
-            torch.set_float32_matmul_precision("high")
-            self.model.generation_config.cache_implementation = "static"
-            self.model.generation_config.max_new_tokens = 256
-            self.model.forward = torch.compile(
-                self.model.forward, 
-                mode="reduce-overhead", 
-                fullgraph=True
-            )
-
-        self.processor = AutoProcessor.from_pretrained(model_id)
+        ).to(self.device)
+        self.processor = WhisperProcessor.from_pretrained(model_id)
 
         self.sampling_rate = self.processor.feature_extractor.sampling_rate
-
-        self.pipe = pipeline(
-            "automatic-speech-recognition",
-            model=self.model,
-            tokenizer=self.processor.tokenizer,
-            feature_extractor=self.processor.feature_extractor,
-            torch_dtype=self.torch_dtype,
-            device=self.device
-        )
-
-
-    def transcribe_audio(self, audio_input, warmup_passes=0):
+  
+    def transcribe_diarized_audio(self, waveform: torch.Tensor, diarization):
         """
-        Transcribe audio input
-
-        Args:
-            audio_file_path (str or pydub.AudioSegment or np.ndarray): The path to the audio file or an audio segment object. If passed
-            an np.ndarray it must have a sampling rate of 16k
-            warmup_passes (int): Number of warmup passes for torch.compile
-
-        Returns:
-            dict: The transcription result with timestamps.
-        """
-
-        if isinstance(audio_input, str):
-            if not os.path.exists(audio_input):
-                print(f"Error: Audio file not found at {audio_input}")
-                return None
-            
-            waveform, _ = preprocess_audio(audio_input, target_sample_rate=self.sampling_rate)
-
-            
-        elif isinstance(audio_input, torch.Tensor):
-            # assumes audio is already preprocessed
-            waveform = audio_input
+        Transcribes diarized audio segments with context from previous segments.
         
-        else:
-            print(f"Error: Unsupported audio input type: {type(audio_input)}. Must receive audio file name or Tensor of waveform")
-            return None
+        Args:
+            waveform (torch.Tensor): The audio waveform.
+            diarization (pyannote.Core.Annotation): Diarization information.
+        
+        Returns:
+            list: A list of dictionaries with transcription, speaker, and timestamps.
+        """
+        waveform = waveform.squeeze()
 
-        try:
-            if warmup_passes > 0:
-                # 2 warmup steps
-                for _ in tqdm(range(warmup_passes), desc="Warm-up step"):
-                    with sdpa_kernel(SDPBackend.MATH):
-                        result = self.pipe(prepped_input, generate_kwargs={"min_new_tokens": 256, "max_new_tokens": 256})
+        transcriptions = []
+        previous_text = ""
 
-            kernel_context = sdpa_kernel(SDPBackend.MATH) if self.is_compiled else nullcontext()
+        # context_history = [] 
+        # max_context_length = 3
 
-            with kernel_context:
-                result = self.pipe(
-                    waveform, 
-                    generate_kwargs={
-                        "language": "english",
-                        "temperature": (0.0, 0.2, 0.4, 0.6, 0.8, 1.0),
-                        "num_beams": 5,
-                        "logprob_threshold": -1.0,
-                        "condition_on_prev_tokens": True,
-                        "return_timestamps": False
-                    }
-                )
+        for segment, _, speaker in tqdm(diarization.itertracks(yield_label=True), desc="Transcribing segments"):
+            start_time = int(segment.start * self.sampling_rate)
+            end_time = int(segment.end * self.sampling_rate)
             
-            return result
+            audio_chunk = waveform[start_time:end_time]
+            
+            input_features = self.processor(
+                audio_chunk.cpu(), 
+                sampling_rate=self.sampling_rate, 
+                return_tensors="pt"
+            ).input_features.to(self.device, self.torch_dtype)
 
-        except Exception as e:
-            print(f"An error occurred during transcription: {e}")
-            return None
+            prompt_ids = self.processor.get_prompt_ids(
+                previous_text,
+                return_tensors="pt"
+            ).to(self.device)
+
+            generated_ids = self.model.generate(
+                input_features=input_features,
+                # condition_on_prev_tokens=True,
+                # temperature=0.2,
+                num_beams=4,
+                num_beam_groups=2,
+                diversity_penalty=1.0,
+                prompt_ids=prompt_ids,
+                language='english',
+                task='transcribe',
+                temperature=0.0,
+                attention_mask=torch.ones_like(input_features, device=self.device)
+            )
+
+            transcription = self.processor.batch_decode(
+                generated_ids,
+                skip_special_tokens=True
+            )[0]
+            
+            print(transcription)
+            previous_text = transcription
+            
+            transcriptions.append({
+                "speaker": speaker,
+                "start": round(segment.start, 2),
+                "end": round(segment.end, 2),
+                "text": transcription
+            })
+            
+        return transcriptions
+
+        
+    # def transcribe_file(self, audio_file_path: str):
+    #     if not os.path.exists(audio_file_path):
+    #         print(f"Error: Audio file not found at {audio_file_path}")
+    #         return None
+        
+    #     waveform, _ = preprocess_audio(audio_file_path, target_sample_rate=self.sampling_rate)
+    #     waveform = waveform.squeeze().to(self.device)
+        
+    #     transcription, _ = self._transcribe_segment(waveform)
+        
+    #     return {'text': transcription}
+    
  
 
-if __name__ == "__main__":
-    sample_file = "data/sample.wav"
-    tr = WhisperTranscriber()
-    transcription_result = tr.transcribe_audio(sample_file)
-    if transcription_result:
-        os.makedirs("output", exist_ok=True)
-        output_path = "output/transribe_result.txt"
+# if __name__ == "__main__":
+#     sample_file = "data/sample.wav"
+#     tr = WhisperTranscriber()
+#     transcription_result = tr.transcribe_audio(sample_file)
+#     if transcription_result:
+#         os.makedirs("output", exist_ok=True)
+#         output_path = "output/transribe_result.txt"
 
-        print(transcription_result)
+#         print(transcription_result)
 
-        with open(output_path, "w") as f:
-            chunks = transcription_result['chunks']
+#         with open(output_path, "w") as f:
+#             chunks = transcription_result['chunks']
 
-            for chunk in chunks:
-                f.write(f'start={chunk['timestamp'][0]} stop={chunk['timestamp'][1]} text={chunk['text'][1:]}\n')
+#             for chunk in chunks:
+#                 f.write(f'start={chunk['timestamp'][0]} stop={chunk['timestamp'][1]} text={chunk['text'][1:]}\n')
 
 
